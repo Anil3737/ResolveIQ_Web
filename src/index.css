@@ -13,7 +13,10 @@
 }
 
 @layer base {
-  html, body, #root {
+
+  html,
+  body,
+  #root {
     @apply h-full m-0 bg-gray-50 text-gray-900 font-sans;
   }
 }
@@ -34,4 +37,114 @@
   .input-field {
     @apply w-full p-4 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm placeholder:text-gray-400;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   DARK MODE — only applied when .dark is on <html>.
+   Day mode is STRICTLY untouched.
+   ───────────────────────────────────────────────────── */
+
+/* Page background */
+.dark body,
+.dark #root {
+  background-color: #0f0f17 !important;
+  color: #e2e8f0 !important;
+}
+
+/* White surfaces → dark surfaces */
+.dark .bg-white {
+  background-color: #1e1e2e !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #161622 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1a1a28 !important;
+}
+
+/* Borders */
+.dark .border-gray-100 {
+  border-color: #2a2a3e !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #2a2a3e !important;
+}
+
+.dark .border-b {
+  border-color: #252535 !important;
+}
+
+/* Text */
+.dark .text-gray-900 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-gray-800 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-gray-700 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-gray-500 {
+  color: #64748b !important;
+}
+
+.dark .text-gray-400 {
+  color: #475569 !important;
+}
+
+/* Hover states */
+.dark .hover\:bg-gray-50:hover {
+  background-color: #252535 !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: #2a2a3e !important;
+}
+
+/* Inputs */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #252535 !important;
+  color: #e2e8f0 !important;
+  border-color: #2a2a3e !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #475569 !important;
+}
+
+/* Header bar */
+.dark header.bg-white {
+  background-color: #13131f !important;
+  border-color: #1e1e2e !important;
+}
+
+/* Shadows */
+.dark .shadow-sm,
+.dark .shadow-md,
+.dark .shadow-xl,
+.dark .shadow-2xl {
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.5) !important;
 }

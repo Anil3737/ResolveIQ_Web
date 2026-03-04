@@ -9,16 +9,18 @@ import {
     Bell,
     ChevronRight,
     BadgeCheck,
+    Settings,
 } from 'lucide-react';
 
 const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, to: '/agent/dashboard' },
     { label: 'My Queue', icon: Inbox, to: '/agent/queue' },
     { label: 'Resolved', icon: CheckCircle, to: '/agent/resolved' },
+    { label: 'Settings', icon: Settings, to: '/agent/settings' },
 ];
 
 export default function AgentLayout({ children }) {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
     const [mobileOpen, setMobileOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -49,7 +51,7 @@ export default function AgentLayout({ children }) {
                     </div>
                 )}
             </div>
-            <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+            <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto no-scrollbar">
                 {!collapsed && (
                     <p className="text-orange-300/70 text-[10px] font-bold uppercase tracking-widest px-3 mb-3">Navigation</p>
                 )}
@@ -99,8 +101,8 @@ export default function AgentLayout({ children }) {
                 transition-all duration-300 ease-in-out shrink-0 relative shadow-2xl shadow-amber-900/30
                 ${collapsed ? 'w-[72px]' : 'w-64'}`}>
                 <button onClick={() => setCollapsed(!collapsed)}
-                    className="absolute -right-3 top-8 z-10 w-6 h-6 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50">
-                    <ChevronRight className={`w-3.5 h-3.5 text-gray-500 transition-transform ${collapsed ? '' : 'rotate-180'}`} />
+                    className="absolute -right-4 top-8 z-10 w-8 h-8 rounded-xl bg-white border border-gray-200 shadow-xl flex items-center justify-center hover:bg-gray-50 transition-all hover:scale-110 active:scale-90">
+                    <Menu className={`w-4 h-4 text-orange-600 transition-transform ${collapsed ? '' : 'rotate-90'}`} />
                 </button>
                 <SidebarContent />
             </aside>

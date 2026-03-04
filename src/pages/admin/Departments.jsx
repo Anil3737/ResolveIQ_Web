@@ -180,8 +180,8 @@ const Departments = () => {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[40px] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-[40px] w-full max-w-lg shadow-2xl overflow-hidden">
                         <div className="p-8 sm:p-10 space-y-8">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-1">

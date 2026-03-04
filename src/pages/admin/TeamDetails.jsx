@@ -428,8 +428,8 @@ const TeamDetails = () => {
 
             {/* Add Member Modal */}
             {showAddMember && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[80vh]">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
                         <div className="p-8 border-b border-gray-50 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Add Team Member</h3>

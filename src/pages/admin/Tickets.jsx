@@ -6,11 +6,13 @@ import {
     ChevronRight,
     Loader2,
     AlertCircle,
+    CheckCircle2,
     User,
     Layers,
     ShieldAlert,
     Clock,
-    AlertTriangle
+    AlertTriangle,
+    Ticket
 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -24,8 +26,12 @@ const statusColors = {
 
 const priorityColors = {
     'HIGH': 'bg-red-100 text-red-700',
+    'P1': 'bg-red-100 text-red-700',
     'MEDIUM': 'bg-amber-100 text-amber-700',
+    'P2': 'bg-amber-100 text-amber-700',
     'LOW': 'bg-emerald-100 text-emerald-700',
+    'P3': 'bg-emerald-100 text-emerald-700',
+    'P4': 'bg-emerald-100 text-emerald-700',
 };
 
 const Tickets = () => {
@@ -37,6 +43,7 @@ const Tickets = () => {
         priority: '',
         department: '',
     });
+    const [activeTab, setActiveTab] = useState('active'); // 'active' or 'resolved'
     const [showFilters, setShowFilters] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -53,11 +60,11 @@ const Tickets = () => {
 
                 // Apply variant filters if any
                 if (variant === 'high_risk') {
-                    allTickets = allTickets.filter(t => t.priority === 'HIGH' || (t.ai_score && t.ai_score >= 85));
+                    allTickets = allTickets.filter(t => t.ai_score && t.ai_score >= 70);
                 } else if (variant === 'sla') {
-                    allTickets = allTickets.filter(t => t.sla_breached || t.status === 'OVERDUE'); // Assuming backend has sla_breached
+                    allTickets = allTickets.filter(t => t.sla_breached || t.status === 'OVERDUE');
                 } else if (variant === 'escalated') {
-                    allTickets = allTickets.filter(t => t.is_escalated); // Assuming backend has is_escalated
+                    allTickets = allTickets.filter(t => t.escalation_required || t.status === 'ESCALATED');
                 }
 
                 setTickets(allTickets);
@@ -76,11 +83,14 @@ const Tickets = () => {
             t.ticket_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             t.created_by_name?.toLowerCase().includes(searchTerm.toLowerCase());
 
+        const isResolved = ['RESOLVED', 'CLOSED'].includes(t.status);
+        const matchesTab = activeTab === 'active' ? !isResolved : isResolved;
+
         const matchesStatus = !filters.status || t.status === filters.status;
         const matchesPriority = !filters.priority || t.priority === filters.priority;
         const matchesDept = !filters.department || t.department_name === filters.department;
 
-        return matchesSearch && matchesStatus && matchesPriority && matchesDept;
+        return matchesSearch && matchesTab && matchesStatus && matchesPriority && matchesDept;
     });
 
     const getHeaderInfo = () => {
@@ -88,7 +98,7 @@ const Tickets = () => {
             case 'high_risk': return { title: 'High Risk Tickets', icon: ShieldAlert, color: 'text-red-600', desc: 'Critical issues requiring immediate attention.' };
             case 'sla': return { title: 'SLA Breached', icon: Clock, color: 'text-orange-600', desc: 'Tickets that have exceeded their service level agreement.' };
             case 'escalated': return { title: 'Escalated Tickets', icon: AlertTriangle, color: 'text-yellow-600', desc: 'Issues that have been escalated to management.' };
-            default: return { title: 'System Tickets', icon: Ticket, color: 'text-gray-900', desc: 'View and manage all tickets across ResolveIQ' };
+            default: return { title: 'System Tickets', icon: Ticket, color: 'text-purple-600', desc: 'View and manage all tickets across ResolveIQ' };
         }
     };
 
@@ -135,8 +145,28 @@ const Tickets = () => {
                 </div>
             </div>
 
+            {/* Active / Resolved Tabs */}
+            <div className="flex p-1.5 bg-gray-100/80 backdrop-blur-sm rounded-[24px] w-fit shadow-inner">
+                {[
+                    { id: 'active', label: 'Active', icon: Clock },
+                    { id: 'resolved', label: 'Resolved', icon: CheckCircle2 }
+                ].map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex items-center gap-2 px-8 py-2.5 rounded-[20px] text-sm font-black transition-all ${activeTab === tab.id
+                            ? 'bg-white text-purple-600 shadow-sm scale-110 z-10'
+                            : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                    >
+                        <tab.icon className="w-4 h-4" />
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
             {showFilters && (
-                <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap gap-4 animate-in slide-in-from-top-2 duration-200">
+                <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap gap-4">
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Status</label>
                         <select
@@ -201,7 +231,7 @@ const Tickets = () => {
                                     </td>
                                 </tr>
                             ) : filteredTickets.map((t) => (
-                                <tr key={t.id} className={`hover:bg-purple-50/30 transition-colors group ${t.priority === 'HIGH' ? 'bg-red-50/50' : ''}`}>
+                                <tr key={t.id} className={`hover:bg-purple-50/30 transition-colors group ${(['HIGH', 'P1'].includes(t.priority)) ? 'bg-red-50/50' : ''}`}>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-black text-gray-900 group-hover:text-purple-700 transition-colors cursor-pointer" onClick={() => navigate(`/admin/tickets/${t.id}`)}>

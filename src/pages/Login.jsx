@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import api from '../utils/api';
@@ -10,8 +10,13 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-
     const navigate = useNavigate();
+
+    // Reset state on mount to ensure clean fields on refresh
+    useEffect(() => {
+        setEmail('');
+        setPassword('');
+    }, []);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -24,6 +29,12 @@ const Login = () => {
 
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('user', JSON.stringify(data.user));
+
+            // ── First-login guard: admin-created staff must change password ──
+            if (data.user.require_password_change) {
+                navigate('/change-password');
+                return;
+            }
 
             // Route based on role
             const role = data.user.role;
@@ -45,6 +56,7 @@ const Login = () => {
         }
     };
 
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12">
             <div className="w-full max-w-md">
@@ -53,7 +65,7 @@ const Login = () => {
                     <p className="text-sm text-gray-500">Sign in to access your account</p>
                 </header>
 
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
                     <div className="card-premium space-y-4">
                         <div>
                             <label className="block text-sm font-bold text-gray-900 mb-2">Email Address</label>
@@ -66,6 +78,7 @@ const Login = () => {
                                     placeholder="name@company.com"
                                     className="input-field pl-12"
                                     required
+                                    autoComplete="email-hidden"
                                 />
                             </div>
                         </div>
@@ -84,6 +97,7 @@ const Login = () => {
                                     placeholder="••••••••"
                                     className="input-field pl-12 pr-12"
                                     required
+                                    autoComplete="new-password"
                                 />
                                 <button
                                     type="button"

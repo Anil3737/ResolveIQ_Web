@@ -162,6 +162,45 @@ const TicketDetails = () => {
                             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Description</label>
                             <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-wrap">{ticket.description}</p>
                         </div>
+
+                        {/* AI Explanation Breakdown */}
+                        {ticket.ai_explanation && (
+                            <div className="pt-6 border-t border-gray-50 space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <ShieldAlert className="w-4 h-4 text-purple-600" />
+                                    <h3 className="text-[11px] font-bold text-gray-900 uppercase tracking-widest">AI Intelligence Breakdown</h3>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {[
+                                        { label: 'Severity', value: ticket.ai_explanation.severity, max: 40, color: 'bg-red-500' },
+                                        { label: 'Impact', value: ticket.ai_explanation.impact, max: 20, color: 'bg-orange-500' },
+                                        { label: 'Urgency', value: ticket.ai_explanation.urgency, max: 15, color: 'bg-yellow-500' },
+                                        { label: 'Complexity', value: ticket.ai_explanation.complexity, max: 10, color: 'bg-blue-500' }
+                                    ].map((item) => (
+                                        <div key={item.label} className="bg-gray-50/50 rounded-2xl p-3 space-y-2 border border-gray-100/50">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-tight">{item.label}</span>
+                                                <span className="text-[10px] font-black text-gray-900">{item.value}</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-gray-200/50 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full ${item.color} transition-all duration-1000 ease-out`}
+                                                    style={{ width: `${(item.value / item.max) * 100}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                {ticket.ai_score >= 70 && (
+                                    <div className="flex items-start gap-2 p-3 bg-red-50/50 rounded-xl border border-red-100/50">
+                                        <AlertCircle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
+                                        <p className="text-[10px] text-red-700 leading-relaxed font-medium">
+                                            Critical signal detected in the content. This ticket has been prioritized for immediate review based on weighted severity and impact analysis.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Quick Admin Actions */}
@@ -190,11 +229,11 @@ const TicketDetails = () => {
                 <div className="space-y-6">
                     {/* AI Risk Card */}
                     <div className={`rounded-3xl p-6 border shadow-sm relative overflow-hidden ${ticket.ai_score >= 85 ? 'bg-red-50 border-red-100' :
-                            ticket.ai_score >= 70 ? 'bg-orange-50 border-orange-100' : 'bg-green-50 border-green-100'
+                        ticket.ai_score >= 70 ? 'bg-orange-50 border-orange-100' : 'bg-green-50 border-green-100'
                         }`}>
                         <div className="relative z-10 flex flex-col items-center text-center">
                             <ShieldAlert className={`w-10 h-10 mb-2 ${ticket.ai_score >= 85 ? 'text-red-500' :
-                                    ticket.ai_score >= 70 ? 'text-orange-500' : 'text-green-500'
+                                ticket.ai_score >= 70 ? 'text-orange-500' : 'text-green-500'
                                 }`} />
                             <div className="text-3xl font-black text-gray-900 leading-none">{ticket.ai_score || 0}%</div>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">AI Risk Score</p>
@@ -220,8 +259,8 @@ const TicketDetails = () => {
                                 return (
                                     <div key={stage.key} className="flex gap-4 pb-8 last:pb-0 relative">
                                         <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 z-10 transition-all duration-500 ${isActive
-                                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-100 scale-110'
-                                                : 'bg-gray-100 text-gray-400'
+                                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-100 scale-110'
+                                            : 'bg-gray-100 text-gray-400'
                                             }`}>
                                             <stage.icon className="w-4 h-4" />
                                         </div>

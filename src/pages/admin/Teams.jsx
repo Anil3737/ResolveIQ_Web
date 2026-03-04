@@ -225,8 +225,8 @@ const Teams = () => {
 
             {/* Create Team Modal */}
             {showCreateModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl overflow-hidden">
                         <div className="p-8 space-y-6">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Create New Team</h3>

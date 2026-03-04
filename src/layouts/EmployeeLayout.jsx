@@ -29,10 +29,15 @@ const navItems = [
         icon: PlusCircle,
         to: '/employee/create-ticket',
     },
+    {
+        label: 'Settings',
+        icon: User,
+        to: '/employee/settings',
+    },
 ];
 
 export default function EmployeeLayout({ children }) {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
     const [mobileOpen, setMobileOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -66,7 +71,7 @@ export default function EmployeeLayout({ children }) {
             </div>
 
             {/* Nav */}
-            <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+            <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto no-scrollbar">
                 {!collapsed && (
                     <p className="text-blue-400/70 text-[10px] font-bold uppercase tracking-widest px-3 mb-3">
                         Navigation
@@ -110,12 +115,12 @@ export default function EmployeeLayout({ children }) {
             {/* User Profile Footer */}
             <div className={`border-t border-white/10 p-3 space-y-1`}>
                 <Link
-                    to="/employee/profile"
+                    to="/employee/settings"
                     onClick={onNav}
                     title={collapsed ? 'Profile' : undefined}
                     className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-white/10 group
                         ${collapsed ? 'justify-center' : ''}
-                        ${isActive('/employee/profile') ? 'bg-white/15' : ''}
+                        ${isActive('/employee/settings') ? 'bg-white/15' : ''}
                     `}
                 >
                     <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -160,12 +165,9 @@ export default function EmployeeLayout({ children }) {
                 {/* Collapse Toggle */}
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="absolute -right-3 top-8 z-10 w-6 h-6 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+                    className="absolute -right-4 top-8 z-10 w-8 h-8 rounded-xl bg-white border border-gray-200 shadow-xl flex items-center justify-center hover:bg-gray-50 transition-all hover:scale-110 active:scale-90"
                 >
-                    {collapsed
-                        ? <ChevronRight className="w-3.5 h-3.5 text-gray-500" />
-                        : <ChevronRight className="w-3.5 h-3.5 text-gray-500 rotate-180" />
-                    }
+                    <Menu className={`w-4 h-4 text-blue-600 transition-transform ${collapsed ? '' : 'rotate-90'}`} />
                 </button>
 
                 <SidebarContent />
@@ -216,7 +218,7 @@ export default function EmployeeLayout({ children }) {
 
                         <div className="h-8 w-px bg-gray-100 mx-1" />
 
-                        <Link to="/employee/profile" className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-gray-50 transition-colors">
+                        <Link to="/employee/settings" className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-gray-50 transition-colors">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white text-xs font-bold shadow-sm">
                                 {initials}
                             </div>

@@ -10,6 +10,7 @@ import {
     Bell,
     ChevronRight,
     Network,
+    Settings,
 } from 'lucide-react';
 
 const navItems = [
@@ -17,10 +18,11 @@ const navItems = [
     { label: 'Pending Tickets', icon: ClipboardList, to: '/team-lead/tickets' },
     { label: 'My Team', icon: Users, to: '/team-lead/team' },
     { label: 'Assign Tickets', icon: Ticket, to: '/team-lead/assign' },
+    { label: 'Settings', icon: Settings, to: '/team-lead/settings' },
 ];
 
 export default function TeamLeadLayout({ children }) {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
     const [mobileOpen, setMobileOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -51,7 +53,7 @@ export default function TeamLeadLayout({ children }) {
                     </div>
                 )}
             </div>
-            <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+            <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto no-scrollbar">
                 {!collapsed && (
                     <p className="text-teal-300/70 text-[10px] font-bold uppercase tracking-widest px-3 mb-3">Navigation</p>
                 )}
@@ -101,8 +103,8 @@ export default function TeamLeadLayout({ children }) {
                 transition-all duration-300 ease-in-out shrink-0 relative shadow-2xl shadow-teal-900/30
                 ${collapsed ? 'w-[72px]' : 'w-64'}`}>
                 <button onClick={() => setCollapsed(!collapsed)}
-                    className="absolute -right-3 top-8 z-10 w-6 h-6 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50">
-                    <ChevronRight className={`w-3.5 h-3.5 text-gray-500 transition-transform ${collapsed ? '' : 'rotate-180'}`} />
+                    className="absolute -right-4 top-8 z-10 w-8 h-8 rounded-xl bg-white border border-gray-200 shadow-xl flex items-center justify-center hover:bg-gray-50 transition-all hover:scale-110 active:scale-90">
+                    <Menu className={`w-4 h-4 text-teal-600 transition-transform ${collapsed ? '' : 'rotate-90'}`} />
                 </button>
                 <SidebarContent />
             </aside>

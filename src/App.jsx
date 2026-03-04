@@ -25,13 +25,29 @@ import AdminTeams from './pages/admin/Teams';
 import AdminTeamDetails from './pages/admin/TeamDetails';
 import AdminDepartments from './pages/admin/Departments';
 import AdminGroupedTickets from './pages/admin/AdminGroupedTickets';
+import AdminUsers from './pages/admin/Users';
 import AdminFilteredTickets from './pages/admin/AdminFilteredTickets';
+import AdminActivity from './pages/admin/Activity';
+import AdminEscalations from './pages/admin/Escalations';
+import AdminReports from './pages/admin/Reports';
+import AdminRisk from './pages/admin/RiskPolicies';
+import CreateStaff from './pages/admin/CreateStaff';
 
 // Team Lead Pages
 import TeamLeadDashboard from './pages/teamlead/Dashboard';
+import TeamLeadTickets from './pages/teamlead/Tickets';
+import TeamLeadTeam from './pages/teamlead/Team';
+import TeamLeadAssign from './pages/teamlead/Assign';
+import TeamLeadTicketDetails from './pages/teamlead/TicketDetails';
 
 // Agent Pages
 import AgentDashboard from './pages/agent/Dashboard';
+import AgentTickets from './pages/agent/Tickets';
+import AgentTicketDetails from './pages/agent/AgentTicketDetails';
+
+// Common
+import Settings from './pages/common/Settings';
+import ChangePassword from './pages/common/ChangePassword';
 
 // Protected Route — checks token AND role
 const ProtectedRoute = ({ children, role }) => {
@@ -49,6 +65,7 @@ function App() {
         {/* ── Public ── */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/change-password" element={<ChangePassword />} />
 
         {/* ── Employee ── */}
         <Route path="/employee" element={<ProtectedRoute role="EMPLOYEE"><EmployeeLayout /></ProtectedRoute>}>
@@ -57,6 +74,7 @@ function App() {
           <Route path="create-ticket" element={<CreateTicket />} />
           <Route path="my-tickets" element={<MyTickets />} />
           <Route path="ticket/:id" element={<TicketDetails />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* ── Admin ── */}
@@ -70,18 +88,34 @@ function App() {
           <Route path="teams" element={<AdminTeams />} />
           <Route path="teams/:id" element={<AdminTeamDetails />} />
           <Route path="departments" element={<AdminDepartments />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="activity" element={<AdminActivity />} />
+          <Route path="escalations" element={<AdminEscalations />} />
+          <Route path="reports" element={<AdminReports />} />
+          <Route path="risk" element={<AdminRisk />} />
+          <Route path="create-staff" element={<CreateStaff />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* ── Team Lead ── */}
         <Route path="/team-lead" element={<ProtectedRoute role="TEAM_LEAD"><TeamLeadLayout /></ProtectedRoute>}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<TeamLeadDashboard />} />
+          <Route path="tickets" element={<TeamLeadTickets />} />
+          <Route path="tickets/:id" element={<TeamLeadTicketDetails />} />
+          <Route path="team" element={<TeamLeadTeam />} />
+          <Route path="assign" element={<TeamLeadAssign />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* ── Agent ── */}
         <Route path="/agent" element={<ProtectedRoute role="AGENT"><AgentLayout /></ProtectedRoute>}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AgentDashboard />} />
+          <Route path="queue" element={<AgentTickets />} />
+          <Route path="resolved" element={<AgentTickets />} />
+          <Route path="tickets/:id" element={<AgentTicketDetails />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* ── Default ── */}
