@@ -21,6 +21,7 @@ import {
     Hash
 } from 'lucide-react';
 import api from '../../utils/api';
+import { parseTicketData } from '../../utils/ticketUtils';
 
 const TicketDetails = () => {
     const { id } = useParams();
@@ -37,7 +38,8 @@ const TicketDetails = () => {
         try {
             setLoading(true);
             const response = await api.get(`/tickets/${id}`);
-            setTicket(response.data.data);
+            const parsed = parseTicketData(response.data.data);
+            setTicket(parsed);
             setProgress(response.data.progress);
         } catch (err) {
             console.error('Failed to fetch ticket details:', err);
@@ -182,7 +184,7 @@ const TicketDetails = () => {
 
                             <div className="bg-gray-50/50 rounded-[40px] p-8 border border-gray-50 shadow-inner-sm">
                                 <p className="text-lg text-gray-600 leading-relaxed font-medium whitespace-pre-wrap">
-                                    {ticket.description}
+                                    {ticket.cleanDescription || ticket.description}
                                 </p>
                             </div>
 

@@ -15,6 +15,7 @@ import {
     Briefcase,
 } from 'lucide-react';
 import api from '../../utils/api';
+import { parseTicketData } from '../../utils/ticketUtils';
 
 const statusColors = {
     'OPEN': 'text-blue-600 bg-blue-50 border-blue-100',
@@ -45,7 +46,8 @@ const TicketDetails = () => {
         const fetchTicket = async () => {
             try {
                 const res = await api.get(`/tickets/${id}`);
-                setTicket(res.data.data);
+                const parsed = parseTicketData(res.data.data);
+                setTicket(parsed);
                 setProgress(res.data.progress);
             } catch (err) {
                 console.error('Failed to fetch ticket details:', err);
@@ -150,6 +152,13 @@ const TicketDetails = () => {
                                 </div>
                             </div>
                             <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Location</label>
+                                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 capitalize">
+                                    <MapPin className="w-4 h-4 text-purple-400" />
+                                    {ticket.location || 'N/A'}
+                                </div>
+                            </div>
+                            <div className="space-y-1">
                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Priority</label>
                                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                                     <div className={`w-2 h-2 rounded-full ${ticket.priority === 'HIGH' ? 'bg-red-500' : ticket.priority === 'MEDIUM' ? 'bg-orange-500' : 'bg-green-500'}`} />
@@ -160,7 +169,9 @@ const TicketDetails = () => {
 
                         <div className="space-y-3">
                             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Description</label>
-                            <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-wrap">{ticket.description}</p>
+                            <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-wrap">
+                                {ticket.cleanDescription || ticket.description}
+                            </p>
                         </div>
 
                         {/* AI Explanation Breakdown */}

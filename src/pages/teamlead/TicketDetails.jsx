@@ -14,6 +14,7 @@ import {
     UserCheck,
 } from 'lucide-react';
 import api from '../../utils/api';
+import { parseTicketData } from '../../utils/ticketUtils';
 
 const statusColors = {
     'OPEN': 'text-blue-600 bg-blue-50 border-blue-100',
@@ -39,7 +40,8 @@ const TeamLeadTicketDetails = () => {
                     api.get(`/tickets/${id}`),
                     api.get('/team-lead/team-members')
                 ]);
-                setTicket(tkRes.data.data);
+                const parsed = parseTicketData(tkRes.data.data);
+                setTicket(parsed);
                 setTeamMembers(tmRes.data.data || []);
             } catch (err) {
                 console.error('Failed to fetch ticket details:', err);
@@ -133,6 +135,15 @@ const TeamLeadTicketDetails = () => {
                                 </div>
                             </div>
                             <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] block">Location</label>
+                                <div className="flex items-center gap-2 text-base font-black text-gray-900 capitalize">
+                                    <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+                                        <Briefcase className="w-4 h-4" />
+                                    </div>
+                                    {ticket.location || 'N/A'}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] block">Category</label>
                                 <div className="flex items-center gap-2 text-base font-black text-gray-900">
                                     <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
@@ -153,7 +164,7 @@ const TeamLeadTicketDetails = () => {
                         <div className="space-y-4">
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] block">Description</label>
                             <p className="text-gray-600 leading-relaxed text-lg font-medium whitespace-pre-wrap selection:bg-teal-50 selection:text-teal-900">
-                                {ticket.description}
+                                {ticket.cleanDescription || ticket.description}
                             </p>
                         </div>
 

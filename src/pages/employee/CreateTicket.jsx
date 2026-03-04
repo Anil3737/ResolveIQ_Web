@@ -14,6 +14,7 @@ import {
     Calendar
 } from 'lucide-react';
 import api from '../../utils/api';
+import { formatTicketSubmit } from '../../utils/ticketUtils';
 
 const CreateTicket = () => {
     const navigate = useNavigate();
@@ -23,6 +24,7 @@ const CreateTicket = () => {
         title: '',
         description: '',
         issue_type: '',
+        location: '',
         expected_resolution_time: ''
     });
 
@@ -44,7 +46,8 @@ const CreateTicket = () => {
         setLoading(true);
 
         try {
-            await api.post('/tickets', formData);
+            const formattedData = formatTicketSubmit(formData);
+            await api.post('/tickets', formattedData);
             setSuccess(true);
             setTimeout(() => navigate('/employee/dashboard'), 2000);
         } catch (err) {
@@ -126,8 +129,24 @@ const CreateTicket = () => {
                                                 <option key={type} value={type}>{type}</option>
                                             ))}
                                         </select>
-                                        <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 rotate-90 pointer-events-none" />
                                     </div>
+                                </div>
+
+                                {/* Location Section */}
+                                <div className="space-y-4">
+                                    <label className="flex items-center gap-3 text-xs font-black text-indigo-600 uppercase tracking-widest px-2">
+                                        <MapPin className="w-5 h-5" />
+                                        Workplace / Asset Location
+                                    </label>
+                                    <input
+                                        name="location"
+                                        value={formData.location}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. Block A, Floor 3, Lab 102"
+                                        className="w-full px-8 py-5 bg-gray-50 border-2 border-transparent rounded-[24px] focus:bg-white focus:border-indigo-500 outline-none transition-all font-bold text-lg shadow-inner-sm"
+                                        required
+                                    />
+                                    <p className="text-[10px] text-gray-400 font-bold px-4">Specify where the incident is occurring for field support dispatch.</p>
                                 </div>
 
                                 {/* Expected Resolution Time */}

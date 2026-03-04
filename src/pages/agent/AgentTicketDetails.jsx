@@ -6,6 +6,7 @@ import {
     UserCheck, Play, ThumbsDown
 } from 'lucide-react';
 import api from '../../utils/api';
+import { parseTicketData } from '../../utils/ticketUtils';
 
 const statusColors = {
     'APPROVED': 'text-purple-600 bg-purple-50 border-purple-100',
@@ -31,9 +32,8 @@ const AgentTicketDetails = () => {
         try {
             setLoading(true);
             const res = await api.get(`/tickets/${id}`);
-            // Note: The /tickets/:id endpoint for Agent role should return can_accept etc logic
-            // But we can also derive it here based on the ticket object
-            setTicket(res.data.data);
+            const parsed = parseTicketData(res.data.data);
+            setTicket(parsed);
         } catch (err) {
             console.error('Failed to fetch ticket details:', err);
             navigate('/agent/dashboard');
@@ -108,6 +108,15 @@ const AgentTicketDetails = () => {
                                 </div>
                             </div>
                             <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] block">Location</label>
+                                <div className="flex items-center gap-2 text-base font-black text-gray-900 capitalize">
+                                    <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+                                        <Briefcase className="w-4 h-4" />
+                                    </div>
+                                    {ticket.location || 'N/A'}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] block">Category</label>
                                 <div className="flex items-center gap-2 text-base font-black text-gray-900">
                                     <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
@@ -128,7 +137,7 @@ const AgentTicketDetails = () => {
                         <div className="space-y-4">
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] block">Description</label>
                             <p className="text-gray-600 leading-relaxed text-lg font-medium whitespace-pre-wrap selection:bg-amber-50 selection:text-amber-900">
-                                {ticket.description}
+                                {ticket.cleanDescription || ticket.description}
                             </p>
                         </div>
 
