@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Users, UserCheck, Shield, Zap,
     Loader2, AlertCircle, ArrowRight,
-    TrendingUp, UserX, Mail, Phone,
-    Calendar, Briefcase
+    TrendingUp, UserX, Mail, Fingerprint,
+    Calendar, Briefcase, BarChart3
 } from 'lucide-react';
 import api from '../../utils/api';
 
 const Team = () => {
     const [teamMembers, setTeamMembers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTeam = async () => {
@@ -50,6 +52,19 @@ const Team = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/team-lead/performance')}
+                        className="bg-white px-6 py-3 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-4 hover:border-teal-500 hover:shadow-md transition-all group"
+                    >
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Team Performance</p>
+                            <p className="text-sm font-black text-gray-900 group-hover:text-teal-600 transition-colors">View Analytics</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-all">
+                            <BarChart3 className="w-5 h-5" />
+                        </div>
+                    </button>
+
                     <div className="bg-white px-6 py-3 rounded-[24px] border border-gray-100 shadow-sm flex items-center gap-4">
                         <div className="text-right">
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Team Capacity</p>
@@ -110,12 +125,15 @@ const Team = () => {
                                         <span className="text-sm font-bold truncate">{member.email || 'agent@resolveiq.com'}</span>
                                     </div>
                                     <div className="flex items-center gap-3 text-gray-500 group-hover:text-gray-900 transition-colors">
-                                        <Phone className="w-4 h-4 text-teal-400" />
-                                        <span className="text-sm font-bold">{member.phone || '+91 98765 43210'}</span>
+                                        <Fingerprint className="w-4 h-4 text-teal-400" />
+                                        <span className="text-sm font-bold">{member.emp_id || 'EMP-0000'}</span>
                                     </div>
                                 </div>
 
-                                <button className="w-full py-5 bg-gray-50 hover:bg-teal-600 text-gray-400 hover:text-white rounded-[24px] font-black text-xs uppercase tracking-[0.2em] transition-all group-hover:shadow-xl group-hover:shadow-teal-600/20 active:scale-95">
+                                <button
+                                    onClick={() => navigate('/team-lead/performance')}
+                                    className="w-full py-5 bg-gray-50 hover:bg-teal-600 text-gray-400 hover:text-white rounded-[24px] font-black text-xs uppercase tracking-[0.2em] transition-all group-hover:shadow-xl group-hover:shadow-teal-600/20 active:scale-95"
+                                >
                                     Performance Analytics
                                 </button>
                             </div>

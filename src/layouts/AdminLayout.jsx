@@ -29,7 +29,7 @@ const navItems = [
 ];
 
 const secondaryNavItems = [
-    { label: 'SLA Policies', icon: ShieldAlert, to: '/admin/risk' },
+    { label: 'SLA Engine', icon: ShieldAlert, to: '/admin/risk' },
     { label: 'Escalations', icon: Bell, to: '/admin/escalations' },
     { label: 'Reports', icon: BarChart3, to: '/admin/reports' },
     { label: 'Settings', icon: Settings, to: '/admin/settings' },

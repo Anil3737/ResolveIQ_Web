@@ -44,8 +44,8 @@ const MyTickets = () => {
     const getStatusStyles = (status) => {
         switch (status) {
             case 'OPEN': return 'text-blue-600 bg-blue-50 border-blue-100';
-            case 'IN_PROGRESS':
-            case 'APPROVED': return 'text-amber-600 bg-amber-50 border-amber-100';
+            case 'APPROVED': return 'text-purple-600 bg-purple-50 border-purple-100';
+            case 'IN_PROGRESS': return 'text-amber-600 bg-amber-50 border-amber-100';
             case 'RESOLVED':
             case 'CLOSED': return 'text-emerald-600 bg-emerald-50 border-emerald-100';
             default: return 'text-gray-500 bg-gray-50 border-gray-100';
@@ -112,7 +112,7 @@ const MyTickets = () => {
 
                     <div className="flex items-center gap-4 w-full lg:w-auto">
                         <div className="bg-gray-50 p-2 rounded-[24px] flex items-center gap-2 border border-gray-100 w-full lg:w-auto overflow-x-auto no-scrollbar">
-                            {['ALL', 'OPEN', 'IN_PROGRESS', 'RESOLVED'].map((status) => (
+                            {['ALL', 'OPEN', 'APPROVED', 'IN_PROGRESS', 'RESOLVED'].map((status) => (
                                 <button
                                     key={status}
                                     onClick={() => setFilterStatus(status)}

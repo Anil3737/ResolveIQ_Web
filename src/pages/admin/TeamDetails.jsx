@@ -143,8 +143,13 @@ const TeamDetails = () => {
     };
 
     const availableAgents = allAgents.filter(a =>
+        a.department_id === team.department_id && // Only show agents from this department
         !members.find(m => m.id === a.id) &&
         a.full_name.toLowerCase().includes(agentSearch.toLowerCase())
+    );
+
+    const filteredLeads = leads.filter(l =>
+        !editedTeam.department_id || l.department_id === parseInt(editedTeam.department_id)
     );
 
     if (loading) {
@@ -297,7 +302,7 @@ const TeamDetails = () => {
                                         className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
                                     >
                                         <option value="">Select Lead</option>
-                                        {leads.map(l => (
+                                        {filteredLeads.map(l => (
                                             <option key={l.id} value={l.id}>{l.full_name}</option>
                                         ))}
                                     </select>
@@ -432,7 +437,12 @@ const TeamDetails = () => {
                     <div className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
                         <div className="p-8 border-b border-gray-50 space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Add Team Member</h3>
+                                <div className="flex flex-col">
+                                    <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Add Team Member</h3>
+                                    <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest">
+                                        Filtering {team.department_name} Agents
+                                    </p>
+                                </div>
                                 <button
                                     onClick={() => setShowAddMember(false)}
                                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"

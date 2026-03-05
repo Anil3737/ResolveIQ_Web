@@ -10,12 +10,17 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    // readOnly trick: fields are read-only on page load so the browser does NOT
+    // auto-fill them. On first click/focus readOnly is removed, which makes the
+    // browser show its saved-credentials / password dropdown.
+    const [emailReadOnly, setEmailReadOnly] = useState(true);
+    const [passwordReadOnly, setPasswordReadOnly] = useState(true);
     const navigate = useNavigate();
 
-    // Reset state on mount to ensure clean fields on refresh
+    // Check if user had Remember Me set (just tick the checkbox — don't pre-fill field)
     useEffect(() => {
-        setEmail('');
-        setPassword('');
+        const wasRemembered = localStorage.getItem('rememberMe') === 'true';
+        if (wasRemembered) setRememberMe(true);
     }, []);
 
     const handleLogin = async (e) => {
@@ -29,6 +34,15 @@ const Login = () => {
 
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('user', JSON.stringify(data.user));
+
+            // Save or clear remembered email based on checkbox
+            if (rememberMe) {
+                localStorage.setItem('rememberedEmail', email);
+                localStorage.setItem('rememberMe', 'true');
+            } else {
+                localStorage.removeItem('rememberedEmail');
+                localStorage.removeItem('rememberMe');
+            }
 
             // ── First-login guard: admin-created staff must change password ──
             if (data.user.require_password_change) {
@@ -65,20 +79,24 @@ const Login = () => {
                     <p className="text-sm text-gray-500">Sign in to access your account</p>
                 </header>
 
-                <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
+                <form onSubmit={handleLogin} className="space-y-4" autoComplete="on">
                     <div className="card-premium space-y-4">
                         <div>
                             <label className="block text-sm font-bold text-gray-900 mb-2">Email Address</label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
+                                    id="email"
                                     type="email"
+                                    name="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    onFocus={() => setEmailReadOnly(false)}
                                     placeholder="name@company.com"
                                     className="input-field pl-12"
                                     required
-                                    autoComplete="email-hidden"
+                                    autoComplete="email"
+                                    readOnly={emailReadOnly}
                                 />
                             </div>
                         </div>
@@ -91,13 +109,17 @@ const Login = () => {
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
+                                    id="password"
                                     type={showPassword ? "text" : "password"}
+                                    name="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    onFocus={() => setPasswordReadOnly(false)}
                                     placeholder="••••••••"
                                     className="input-field pl-12 pr-12"
                                     required
-                                    autoComplete="new-password"
+                                    autoComplete="current-password"
+                                    readOnly={passwordReadOnly}
                                 />
                                 <button
                                     type="button"

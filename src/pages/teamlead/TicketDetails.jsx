@@ -9,12 +9,13 @@ import {
     CheckCircle2,
     AlertCircle,
     Loader2,
-    Briefcase,
+    MapPin,
     ChevronRight,
     UserCheck,
 } from 'lucide-react';
 import api from '../../utils/api';
 import { parseTicketData } from '../../utils/ticketUtils';
+import TicketProgressBar from '../../components/common/TicketProgressBar';
 
 const statusColors = {
     'OPEN': 'text-blue-600 bg-blue-50 border-blue-100',
@@ -28,6 +29,7 @@ const TeamLeadTicketDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [ticket, setTicket] = useState(null);
+    const [progress, setProgress] = useState(null);
     const [teamMembers, setTeamMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -42,6 +44,7 @@ const TeamLeadTicketDetails = () => {
                 ]);
                 const parsed = parseTicketData(tkRes.data.data);
                 setTicket(parsed);
+                setProgress(tkRes.data.progress);
                 setTeamMembers(tmRes.data.data || []);
             } catch (err) {
                 console.error('Failed to fetch ticket details:', err);
@@ -53,37 +56,43 @@ const TeamLeadTicketDetails = () => {
         fetchData();
     }, [id, navigate]);
 
-    const handleApprove = async () => {
+    const handleAction = async () => {
+        if (!ticket) return;
         setActionLoading(true);
         try {
-            await api.post('/team-lead/approve-ticket', { ticket_id: id });
+            if (ticket.status === 'OPEN') {
+                if (selectedAgent) {
+                    // Approve & Assign Flow
+                    await api.post('/team-lead/assign-ticket', {
+                        ticket_id: id,
+                        agent_id: selectedAgent
+                    });
+                } else {
+                    // Just Approve Flow
+                    await api.post('/team-lead/approve-ticket', { ticket_id: id });
+                }
+            } else if (ticket.status === 'APPROVED' && selectedAgent) {
+                // Regular Assign Flow for already approved tickets
+                await api.post('/team-lead/assign-ticket', {
+                    ticket_id: id,
+                    agent_id: selectedAgent
+                });
+            }
+
             // Refresh local state
             const res = await api.get(`/tickets/${id}`);
-            setTicket(res.data.data);
+            const parsed = parseTicketData(res.data.data);
+            setTicket(parsed);
+            setProgress(res.data.progress);
+            setSelectedAgent('');
         } catch (err) {
-            console.error('Failed to approve ticket:', err);
-            alert(err.response?.data?.message || 'Error approving ticket');
+            console.error('Action failed:', err);
+            alert(err.response?.data?.message || 'Error processing request');
         } finally {
             setActionLoading(false);
         }
     };
 
-    const handleAssign = async () => {
-        if (!selectedAgent) return;
-        setActionLoading(true);
-        try {
-            await api.post('/team-lead/assign-ticket', { ticket_id: id, agent_id: selectedAgent });
-            // Refresh local state
-            const res = await api.get(`/tickets/${id}`);
-            setTicket(res.data.data);
-            setSelectedAgent('');
-        } catch (err) {
-            console.error('Failed to assign ticket:', err);
-            alert(err.response?.data?.message || 'Error assigning ticket');
-        } finally {
-            setActionLoading(false);
-        }
-    };
 
     if (loading) {
         return (
@@ -107,6 +116,8 @@ const TeamLeadTicketDetails = () => {
                     Back to Feed
                 </button>
             </div>
+
+            <TicketProgressBar progress={progress} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 {/* Main Info */}
@@ -138,7 +149,7 @@ const TeamLeadTicketDetails = () => {
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] block">Location</label>
                                 <div className="flex items-center gap-2 text-base font-black text-gray-900 capitalize">
                                     <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
-                                        <Briefcase className="w-4 h-4" />
+                                        <MapPin className="w-4 h-4" />
                                     </div>
                                     {ticket.location || 'N/A'}
                                 </div>
@@ -209,49 +220,79 @@ const TeamLeadTicketDetails = () => {
                     <div className="bg-white rounded-[40px] border border-gray-100 shadow-2xl shadow-gray-200/50 overflow-hidden">
                         <div className="p-8 bg-gray-50/50 border-b border-gray-100">
                             <h3 className="text-sm font-black text-gray-900 uppercase tracking-[0.2em] flex items-center gap-3">
-                                <Briefcase className="w-5 h-5 text-teal-600" />
+                                <UserCheck className="w-5 h-5 text-teal-600" />
                                 Action Center
                             </h3>
                         </div>
 
                         <div className="p-8 space-y-8">
-                            {/* Approve Section */}
-                            {ticket.status === 'OPEN' && (
-                                <div className="space-y-4">
-                                    <p className="text-xs font-bold text-gray-400 leading-relaxed uppercase tracking-widest">Initial Validation</p>
-                                    <button
-                                        onClick={handleApprove}
-                                        disabled={actionLoading}
-                                        className="w-full py-5 bg-teal-600 hover:bg-teal-700 text-white rounded-[24px] font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-teal-500/20 active:scale-95 transition-all flex items-center justify-center gap-3"
-                                    >
-                                        {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5" /> Approve Request</>}
-                                    </button>
+                            {/* Declined-by-agent notice */}
+                            {ticket.status === 'APPROVED' && !ticket.assigned_to && (
+                                <div className="bg-red-50 p-5 rounded-[24px] border border-red-100 flex items-start gap-4">
+                                    <div className="p-2 rounded-xl bg-white shadow-sm text-red-500 shrink-0">
+                                        <AlertCircle className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mb-1">Agent Declined</p>
+                                        <p className="text-xs font-bold text-red-800 leading-relaxed">
+                                            This ticket was declined by an agent and returned to the department pool. Please reassign it to another available agent.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Assign Section */}
+                            {/* Unified Decision Flow */}
                             {['OPEN', 'APPROVED'].includes(ticket.status) && (
-                                <div className="space-y-4">
-                                    <p className="text-xs font-bold text-gray-400 leading-relaxed uppercase tracking-widest">Resource Allocation</p>
+                                <div className="space-y-6">
                                     <div className="space-y-3">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] px-1">
+                                            Resource Allocation
+                                        </label>
                                         <select
                                             value={selectedAgent}
                                             onChange={(e) => setSelectedAgent(e.target.value)}
-                                            className="w-full bg-gray-50 border-transparent rounded-[20px] px-5 py-4 text-xs font-black uppercase tracking-widest focus:ring-4 focus:ring-teal-500/10 transition-all cursor-pointer"
+                                            className="w-full bg-gray-50 border-transparent rounded-[20px] px-5 py-4 text-xs font-black uppercase tracking-widest focus:ring-4 focus:ring-teal-500/10 focus:border-indigo-500 transition-all cursor-pointer shadow-inner"
                                         >
-                                            <option value="">Choose Agent</option>
+                                            <option value="">Pool (Multiple Agents)</option>
                                             {teamMembers.map(a => (
-                                                <option key={a.id} value={a.id}>{a.full_name} ({a.active_tickets} Active)</option>
+                                                <option key={a.id} value={a.id}>
+                                                    {a.full_name} ({a.active_tickets} Loading)
+                                                </option>
                                             ))}
                                         </select>
-                                        <button
-                                            onClick={handleAssign}
-                                            disabled={actionLoading || !selectedAgent}
-                                            className="w-full py-5 bg-gray-900 hover:bg-black text-white rounded-[24px] font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-gray-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:scale-100"
-                                        >
-                                            {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><UserCheck className="w-5 h-5" /> Delegate Task</>}
-                                        </button>
+                                        {selectedAgent && (
+                                            <p className="text-[10px] text-teal-600 font-bold px-4 italic animate-pulse">
+                                                Selected agent will be exclusively assigned.
+                                            </p>
+                                        )}
                                     </div>
+
+                                    <button
+                                        onClick={handleAction}
+                                        disabled={actionLoading}
+                                        className={`w-full py-5 rounded-[24px] font-black uppercase tracking-[0.2em] text-xs shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 ${selectedAgent
+                                            ? 'bg-gray-900 text-white shadow-gray-500/20'
+                                            : 'bg-teal-600 text-white shadow-teal-500/20'
+                                            }`}
+                                    >
+                                        {actionLoading ? (
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                        ) : (
+                                            <>
+                                                {ticket.status === 'OPEN' ? (
+                                                    selectedAgent ? <><UserCheck className="w-5 h-5" /> Approve & Assign</> : <><CheckCircle2 className="w-5 h-5" /> Approve Request</>
+                                                ) : (
+                                                    <><UserCheck className="w-5 h-5" /> Delegate Task</>
+                                                )}
+                                            </>
+                                        )}
+                                    </button>
+
+                                    {!selectedAgent && ticket.status === 'OPEN' && (
+                                        <p className="text-[9px] text-center text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
+                                            Ticket will enter the general department pool <br /> for any available agent to claim.
+                                        </p>
+                                    )}
                                 </div>
                             )}
 

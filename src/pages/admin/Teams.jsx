@@ -92,6 +92,10 @@ const Teams = () => {
         return matchesSearch && matchesDept;
     });
 
+    const filteredLeads = leads.filter(l =>
+        !newTeam.department_id || l.department_id === parseInt(newTeam.department_id)
+    );
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -152,15 +156,15 @@ const Teams = () => {
                     <div
                         key={team.id}
                         onClick={() => navigate(`/admin/teams/${team.id}`)}
-                        className="group bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-purple-200 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                        className="group bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-purple-200/50 hover:border-purple-200 transition-all duration-500 cursor-pointer relative overflow-hidden"
                     >
                         {/* Decorative background element */}
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-bl-full -mr-12 -mt-12 group-hover:bg-purple-100 transition-colors" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50/50 rounded-bl-full -mr-16 -mt-16 group-hover:bg-purple-100 transition-colors" />
 
                         <div className="relative z-10 flex flex-col h-full">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
-                                    <UsersRound className="w-6 h-6" />
+                            <div className="flex items-start justify-between mb-6">
+                                <div className="p-4 bg-purple-50 text-purple-600 rounded-[22px] group-hover:bg-purple-600 group-hover:text-white transition-all duration-500 shadow-sm">
+                                    <UsersRound className="w-7 h-7" />
                                 </div>
                                 <button
                                     onClick={(e) => handleDeleteTeam(team.id, e)}
@@ -308,7 +312,7 @@ const Teams = () => {
                                             className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
                                         >
                                             <option value="">Select Lead</option>
-                                            {leads.map(l => (
+                                            {filteredLeads.map(l => (
                                                 <option key={l.id} value={l.id}>{l.full_name}</option>
                                             ))}
                                         </select>

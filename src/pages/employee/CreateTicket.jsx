@@ -4,14 +4,13 @@ import {
     Send,
     AlertCircle,
     HelpCircle,
-    ChevronRight,
-    FileText,
     Tag,
     Loader2,
     CheckCircle2,
     ArrowLeft,
     MessageSquare,
-    Calendar
+    Calendar,
+    MapPin
 } from 'lucide-react';
 import api from '../../utils/api';
 import { formatTicketSubmit } from '../../utils/ticketUtils';
@@ -19,9 +18,7 @@ import { formatTicketSubmit } from '../../utils/ticketUtils';
 const CreateTicket = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
-        title: '',
         description: '',
         issue_type: '',
         location: '',
@@ -32,7 +29,7 @@ const CreateTicket = () => {
         'Network Issue',
         'Hardware Failure',
         'Software Installation',
-        'Application Issues',
+        'Application Downtime / Application Issues',
         'Other'
     ];
 
@@ -47,30 +44,16 @@ const CreateTicket = () => {
 
         try {
             const formattedData = formatTicketSubmit(formData);
-            await api.post('/tickets', formattedData);
-            setSuccess(true);
-            setTimeout(() => navigate('/employee/dashboard'), 2000);
+            // Instead of submittng here, navigate to Waiting page
+            navigate('/employee/waiting', { state: { ticketData: formattedData } });
         } catch (err) {
-            console.error('Failed to create ticket:', err);
-            alert('Failed to create ticket. Please try again.');
+            console.error('Failed to prepare ticket:', err);
+            alert('Failed to process request data.');
         } finally {
             setLoading(false);
         }
     };
 
-    if (success) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#F8FAFC]">
-                <div className="w-32 h-32 bg-emerald-100 rounded-[48px] flex items-center justify-center text-emerald-600 mb-10 border border-emerald-200 shadow-2xl">
-                    <CheckCircle2 className="w-16 h-16" />
-                </div>
-                <h2 className="text-4xl font-black text-gray-900 mb-4 tracking-tighter">Ticket Registered!</h2>
-                <p className="text-gray-400 text-center font-bold text-lg max-w-sm uppercase tracking-widest text-xs">
-                    Your request has been securely submitted to our support infrastructure.
-                </p>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-[#F8FAFC]">
@@ -93,22 +76,6 @@ const CreateTicket = () => {
                     <div className="lg:col-span-7 space-y-8">
                         <form onSubmit={handleSubmit} className="bg-white p-10 md:p-14 rounded-[56px] border border-gray-50 shadow-2xl shadow-gray-500/5 space-y-12">
                             <div className="space-y-10">
-                                {/* Title Section */}
-                                <div className="space-y-4">
-                                    <label className="flex items-center gap-3 text-xs font-black text-indigo-600 uppercase tracking-widest px-2">
-                                        <FileText className="w-5 h-5" />
-                                        Request Title
-                                    </label>
-                                    <input
-                                        name="title"
-                                        value={formData.title}
-                                        onChange={handleInputChange}
-                                        placeholder="Briefly state the issue..."
-                                        className="w-full px-8 py-6 bg-gray-50 border-2 border-transparent rounded-[32px] focus:bg-white focus:border-indigo-500 outline-none transition-all font-black text-2xl shadow-inner-sm"
-                                        required
-                                    />
-                                    <p className="text-[10px] text-gray-400 font-bold px-4">Keep it concise—e.g., "VPN connection failing in Chennai site"</p>
-                                </div>
 
                                 {/* Issue Type Section */}
                                 <div className="space-y-4">

@@ -4,7 +4,7 @@
  * @returns {Object} - Formatted data for API
  */
 export const formatTicketSubmit = (data) => {
-    const { title, description, location, issue_type, expected_resolution_time } = data;
+    const { description, location, issue_type, expected_resolution_time } = data;
 
     // Mobile App Logic: [$issueType] at $location
     const formattedTitle = `[${issue_type}] at ${location || 'N/A'}`;

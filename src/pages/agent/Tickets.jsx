@@ -73,17 +73,24 @@ const AgentTickets = () => {
         }
     };
 
+    // Normalize user id to number for type-safe comparison
+    const agentId = parseInt(user.id);
+
     const filteredTickets = tickets.filter(t => {
         const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             t.ticket_number?.toLowerCase().includes(searchTerm.toLowerCase());
 
         let matchesTab = false;
         if (activeTab === 'pool') {
-            matchesTab = t.can_accept;
+            // Pool: tickets agent can accept (unassigned APPROVED)
+            //       OR directly assigned by lead but not yet accepted
+            matchesTab = t.can_accept ||
+                (parseInt(t.assigned_to) === agentId && !t.accepted_at && t.status === 'IN_PROGRESS');
         } else if (activeTab === 'active') {
-            matchesTab = t.assigned_to === user.id && t.status === 'IN_PROGRESS';
+            // Active: assigned to this agent AND accepted AND in progress
+            matchesTab = parseInt(t.assigned_to) === agentId && t.status === 'IN_PROGRESS' && !!t.accepted_at;
         } else if (activeTab === 'resolved') {
-            matchesTab = t.assigned_to === user.id && (t.status === 'RESOLVED' || t.status === 'CLOSED');
+            matchesTab = parseInt(t.assigned_to) === agentId && (t.status === 'RESOLVED' || t.status === 'CLOSED');
         }
 
         const matchesIssueType = !filters.issue_type || t.issue_type === filters.issue_type;

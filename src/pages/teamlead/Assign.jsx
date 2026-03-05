@@ -117,6 +117,13 @@ const Assign = () => {
                                                                     {t.issue_type || 'General'}
                                                                 </span>
                                                                 <span className="w-1 h-1 rounded-full bg-gray-200" />
+                                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${t.status === 'OPEN'
+                                                                        ? 'text-blue-600 bg-blue-50 border-blue-100'
+                                                                        : 'text-purple-600 bg-purple-50 border-purple-100'
+                                                                    }`}>
+                                                                    {t.status === 'OPEN' ? 'Pending Approval' : 'Approved Pool'}
+                                                                </span>
+                                                                <span className="w-1 h-1 rounded-full bg-gray-200" />
                                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                                                     Created by {t.created_by_name}
                                                                 </span>

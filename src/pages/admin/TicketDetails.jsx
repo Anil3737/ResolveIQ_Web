@@ -13,9 +13,11 @@ import {
     ChevronRight,
     Calendar,
     Briefcase,
+    MapPin,
 } from 'lucide-react';
 import api from '../../utils/api';
 import { parseTicketData } from '../../utils/ticketUtils';
+import TicketProgressBar from '../../components/common/TicketProgressBar';
 
 const statusColors = {
     'OPEN': 'text-blue-600 bg-blue-50 border-blue-100',
@@ -39,6 +41,7 @@ const TicketDetails = () => {
     const navigate = useNavigate();
     const [ticket, setTicket] = useState(null);
     const [progress, setProgress] = useState(null);
+    const [progressTrail, setProgressTrail] = useState(null); // Rename existing if collision
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
 
@@ -49,6 +52,7 @@ const TicketDetails = () => {
                 const parsed = parseTicketData(res.data.data);
                 setTicket(parsed);
                 setProgress(res.data.progress);
+                setProgressTrail(res.data.progress); // If old code used 'progress' for timeline
             } catch (err) {
                 console.error('Failed to fetch ticket details:', err);
                 navigate('/admin/tickets');
@@ -119,6 +123,8 @@ const TicketDetails = () => {
                     Delete Ticket
                 </button>
             </div>
+
+            <TicketProgressBar progress={progress} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Info */}

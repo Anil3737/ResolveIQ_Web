@@ -16,6 +16,8 @@ import EmployeeDashboard from './pages/employee/Dashboard';
 import CreateTicket from './pages/employee/CreateTicket';
 import MyTickets from './pages/employee/MyTickets';
 import TicketDetails from './pages/employee/TicketDetails';
+import TicketWaiting from './pages/employee/TicketWaiting';
+import TicketSuccess from './pages/employee/TicketSuccess';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -30,7 +32,7 @@ import AdminFilteredTickets from './pages/admin/AdminFilteredTickets';
 import AdminActivity from './pages/admin/Activity';
 import AdminEscalations from './pages/admin/Escalations';
 import AdminReports from './pages/admin/Reports';
-import AdminRisk from './pages/admin/RiskPolicies';
+import SLAPolicies from './pages/admin/SLAPolicies';
 import CreateStaff from './pages/admin/CreateStaff';
 
 // Team Lead Pages
@@ -39,6 +41,7 @@ import TeamLeadTickets from './pages/teamlead/Tickets';
 import TeamLeadTeam from './pages/teamlead/Team';
 import TeamLeadAssign from './pages/teamlead/Assign';
 import TeamLeadTicketDetails from './pages/teamlead/TicketDetails';
+import PerformanceAnalytics from './pages/teamlead/PerformanceAnalytics';
 
 // Agent Pages
 import AgentDashboard from './pages/agent/Dashboard';
@@ -74,6 +77,8 @@ function App() {
           <Route path="create-ticket" element={<CreateTicket />} />
           <Route path="my-tickets" element={<MyTickets />} />
           <Route path="ticket/:id" element={<TicketDetails />} />
+          <Route path="waiting" element={<TicketWaiting />} />
+          <Route path="success" element={<TicketSuccess />} />
           <Route path="settings" element={<Settings />} />
         </Route>
 
@@ -92,7 +97,7 @@ function App() {
           <Route path="activity" element={<AdminActivity />} />
           <Route path="escalations" element={<AdminEscalations />} />
           <Route path="reports" element={<AdminReports />} />
-          <Route path="risk" element={<AdminRisk />} />
+          <Route path="risk" element={<SLAPolicies />} />
           <Route path="create-staff" element={<CreateStaff />} />
           <Route path="settings" element={<Settings />} />
         </Route>
@@ -104,6 +109,7 @@ function App() {
           <Route path="tickets" element={<TeamLeadTickets />} />
           <Route path="tickets/:id" element={<TeamLeadTicketDetails />} />
           <Route path="team" element={<TeamLeadTeam />} />
+          <Route path="performance" element={<PerformanceAnalytics />} />
           <Route path="assign" element={<TeamLeadAssign />} />
           <Route path="settings" element={<Settings />} />
         </Route>
