@@ -1,1 +1,1 @@
-ResolveIQ Website
+ResolveIQ
