@@ -44,11 +44,11 @@ const CopyBtn = ({ text }) => {
 };
 
 const DEPARTMENTS = [
-    'Network Issue',
+    'Network Issues',
     'Hardware Failure',
     'Software Installation',
-    'Application Downtime / Application Issues',
-    'Other'
+    'Application Down/ Application Issue',
+    'Others'
 ];
 
 const LOCATIONS = ['Chennai HQ', 'Bangalore', 'Hyderabad'];
@@ -109,11 +109,11 @@ const CreateStaff = () => {
                     const res = await api.get(`/admin/check-id?emp_id=${empId}`);
                     setEmpIdStatus(res.data.exists ? 'taken' : 'ok');
                     if (res.data.exists) {
-                        setErrors(prev => ({ ...prev, emp_id: 'Employee ID already exists' }));
+                        setErrors(prev => ({ ...prev, emp_id: 'Employee Id Already exist' }));
                     } else {
                         setErrors(prev => {
                             const next = { ...prev };
-                            if (next.emp_id === 'Employee ID already exists') delete next.emp_id;
+                            if (next.emp_id === 'Employee Id Already exist') delete next.emp_id;
                             return next;
                         });
                     }
@@ -156,7 +156,7 @@ const CreateStaff = () => {
             } else if (!isLead && !(num >= 1000 && num <= 1999)) {
                 errs.emp_id = 'For Agent, numeric part must be 1000–1999';
             } else if (empIdStatus === 'taken') {
-                errs.emp_id = 'Employee ID already exists';
+                errs.emp_id = 'Employee Id Already exist';
             }
         }
 
@@ -177,7 +177,7 @@ const CreateStaff = () => {
         setFormData(prev => ({ ...prev, [field]: value }));
         setErrors(prev => {
             const next = { ...prev };
-            if (next[field] && next[field] !== 'Employee ID already exists') delete next[field];
+            if (next[field] && next[field] !== 'Employee Id Already exist') delete next[field];
             return next;
         });
     };

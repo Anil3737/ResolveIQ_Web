@@ -18,6 +18,39 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const [termsAccepted, setTermsAccepted] = useState(false);
+    const [empIdStatus, setEmpIdStatus] = useState(null); // null | 'checking' | 'ok' | 'taken'
+    const debounceRef = React.useRef(null);
+
+    // ── Real-time EMP ID uniqueness check ──
+    React.useEffect(() => {
+        const empId = formData.employee_id.trim().toUpperCase();
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        if (empId.length >= 3) { // Check if it's long enough to be an ID
+            setEmpIdStatus('checking');
+            debounceRef.current = setTimeout(async () => {
+                try {
+                    const res = await api.get(`/auth/check-id?emp_id=${empId}`);
+                    setEmpIdStatus(res.data.exists ? 'taken' : 'ok');
+                    if (res.data.exists) {
+                        setErrors(prev => ({ ...prev, employee_id: 'Employee Id Already exist' }));
+                    } else {
+                        setErrors(prev => {
+                            const next = { ...prev };
+                            if (next.employee_id === 'Employee Id Already exist') delete next.employee_id;
+                            return next;
+                        });
+                    }
+                } catch {
+                    setEmpIdStatus(null);
+                }
+            }, 500);
+        } else {
+            setEmpIdStatus(null);
+        }
+
+        return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    }, [formData.employee_id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -124,16 +157,20 @@ const Register = () => {
                         <div>
                             <label className="block text-sm font-bold text-gray-900 mb-2">Employee ID</label>
                             <div className="relative">
-                                <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <IdCard className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${errors.employee_id ? 'text-red-400' : 'text-gray-400'}`} />
                                 <input
                                     name="employee_id"
                                     value={formData.employee_id}
                                     onChange={handleChange}
                                     placeholder="E.g. EMP123"
-                                    className="input-field pl-12"
+                                    className={`input-field pl-12 ${errors.employee_id ? 'border-red-300 bg-red-50' : ''}`}
                                 />
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
+                                    {empIdStatus === 'checking' && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
+                                    {empIdStatus === 'ok' && !errors.employee_id && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
+                                </div>
                             </div>
-                            {errors.employee_id && <p className="mt-1 text-xs text-red-600">{errors.employee_id}</p>}
+                            {errors.employee_id && <p className="mt-1 text-[11px] font-bold text-red-600">{errors.employee_id}</p>}
                         </div>
 
                         {/* Email */}

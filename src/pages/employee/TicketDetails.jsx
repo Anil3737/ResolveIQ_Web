@@ -28,6 +28,7 @@ import {
 import api from '../../utils/api';
 import { parseTicketData } from '../../utils/ticketUtils';
 import TicketProgressBar from '../../components/common/TicketProgressBar';
+import FeedbackModule from '../../components/common/FeedbackModule';
 
 const STATUS_POLLING_INTERVAL = 30000; // 30 seconds
 
@@ -294,6 +295,11 @@ const TicketDetails = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Feedback Module */}
+                        {(ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') && (
+                            <FeedbackModule ticketId={id} />
+                        )}
                     </div>
 
                     {/* Sidebar */}

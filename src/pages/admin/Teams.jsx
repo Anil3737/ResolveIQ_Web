@@ -32,22 +32,26 @@ const Teams = () => {
         goal: '',
         issue_type: '',
         department_id: '',
-        team_lead_id: ''
+        team_lead_id: '',
+        agent_ids: []
     });
     const [leads, setLeads] = useState([]);
+    const [agents, setAgents] = useState([]);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [teamsRes, deptsRes, leadsRes] = await Promise.all([
+                const [teamsRes, deptsRes, leadsRes, agentsRes] = await Promise.all([
                     api.get('/admin/teams'),
                     api.get('/admin/departments'),
-                    api.get('/admin/users?role=TEAM_LEAD')
+                    api.get('/admin/users?role=TEAM_LEAD&exclude_assigned=true'),
+                    api.get('/admin/users?role=AGENT&exclude_assigned=true')
                 ]);
                 setTeams(teamsRes.data.data || []);
                 setDepartments(deptsRes.data.data || []);
                 setLeads(leadsRes.data.data || []);
+                setAgents(agentsRes.data.data || []);
             } catch (err) {
                 console.error('Failed to fetch teams data:', err);
             } finally {
@@ -64,7 +68,7 @@ const Teams = () => {
             const res = await api.post('/admin/teams', newTeam);
             setTeams([res.data.data, ...teams]);
             setShowCreateModal(false);
-            setNewTeam({ name: '', description: '', goal: '', issue_type: '', department_id: '', team_lead_id: '' });
+            setNewTeam({ name: '', description: '', goal: '', issue_type: '', department_id: '', team_lead_id: '', agent_ids: [] });
             // Re-fetch to get complete object with department names etc.
             const refresh = await api.get('/admin/teams');
             setTeams(refresh.data.data);
@@ -92,9 +96,43 @@ const Teams = () => {
         return matchesSearch && matchesDept;
     });
 
-    const filteredLeads = leads.filter(l =>
-        !newTeam.department_id || l.department_id === parseInt(newTeam.department_id)
-    );
+    const filteredLeads = leads.filter(l => {
+        if (!newTeam.department_id) return true;
+
+        const targetId = String(newTeam.department_id);
+        const userDeptId = l.department_id ? String(l.department_id) : '';
+
+        // Exact ID match
+        if (userDeptId === targetId) return true;
+
+        // Fallback: Name-based match (case-insensitive and partial)
+        const targetDept = departments.find(d => String(d.id) === targetId);
+        if (targetDept && l.department_name) {
+            const tName = targetDept.name.toLowerCase();
+            const uName = l.department_name.toLowerCase();
+            return uName.includes(tName) || tName.includes(uName);
+        }
+
+        return false;
+    });
+
+    const filteredAgents = agents.filter(a => {
+        if (!newTeam.department_id) return true;
+
+        const targetId = String(newTeam.department_id);
+        const userDeptId = a.department_id ? String(a.department_id) : '';
+
+        if (userDeptId === targetId) return true;
+
+        const targetDept = departments.find(d => String(d.id) === targetId);
+        if (targetDept && a.department_name) {
+            const tName = targetDept.name.toLowerCase();
+            const uName = a.department_name.toLowerCase();
+            return uName.includes(tName) || tName.includes(uName);
+        }
+
+        return false;
+    });
 
     if (loading) {
         return (
@@ -279,13 +317,39 @@ const Teams = () => {
 
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Issue Type</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Technical, Billing, HR"
+                                    <select
+                                        required
                                         value={newTeam.issue_type}
-                                        onChange={(e) => setNewTeam({ ...newTeam, issue_type: e.target.value })}
-                                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20"
-                                    />
+                                        onChange={(e) => {
+                                            const issueType = e.target.value;
+                                            // Robust mapping of Issue Type to Department Name
+                                            const MAPPING = {
+                                                "Network Issues": "Network Issues",
+                                                "Hardware Failure": "Hardware Failure",
+                                                "Software Installation": "Software Installation",
+                                                "Application Down/ Application Issue": "Application Down/ Application Issue",
+                                                "Others": "Others"
+                                            };
+                                            const targetDeptName = MAPPING[issueType];
+                                            const dept = departments.find(d => d.name === targetDeptName);
+
+                                            setNewTeam({
+                                                ...newTeam,
+                                                issue_type: issueType,
+                                                department_id: dept ? dept.id.toString() : '',
+                                                team_lead_id: '', // Reset selections when specialty changes
+                                                agent_ids: []
+                                            });
+                                        }}
+                                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
+                                    >
+                                        <option value="">Select Issue Type</option>
+                                        <option value="Network Issues">Network Issues</option>
+                                        <option value="Hardware Failure">Hardware Failure</option>
+                                        <option value="Software Installation">Software Installation</option>
+                                        <option value="Application Down/ Application Issue">Application Down/ Application Issue</option>
+                                        <option value="Others">Others</option>
+                                    </select>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -317,6 +381,38 @@ const Teams = () => {
                                             ))}
                                         </select>
                                     </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Support Agents (Multiple)</label>
+                                    <div className="bg-gray-50 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2">
+                                        {filteredAgents.length > 0 ? (
+                                            filteredAgents.map(agent => (
+                                                <label key={agent.id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-colors group">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={newTeam.agent_ids.includes(agent.id)}
+                                                        onChange={(e) => {
+                                                            const ids = e.target.checked
+                                                                ? [...newTeam.agent_ids, agent.id]
+                                                                : newTeam.agent_ids.filter(id => id !== agent.id);
+                                                            setNewTeam({ ...newTeam, agent_ids: ids });
+                                                        }}
+                                                        className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                                                    />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-semibold text-gray-700 group-hover:text-purple-700">{agent.full_name}</span>
+                                                        <span className="text-[10px] text-gray-400">{agent.phone}</span>
+                                                    </div>
+                                                </label>
+                                            ))
+                                        ) : (
+                                            <p className="text-xs text-gray-400 text-center py-4 italic">No unassigned agents found for this specialty.</p>
+                                        )}
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 ml-1">
+                                        Selected: {newTeam.agent_ids.length} agents
+                                    </p>
                                 </div>
 
                                 <div className="pt-4 flex gap-3">

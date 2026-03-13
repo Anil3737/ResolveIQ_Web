@@ -6,7 +6,8 @@ import {
 import {
     TrendingUp, Users, Building2, ShieldCheck, Clock,
     ArrowUpRight, ArrowDownRight, RefreshCcw, Download,
-    Filter, Calendar, ChevronRight, CheckCircle2
+    Filter, Calendar, ChevronRight, CheckCircle2,
+    Star, Heart, Award, ThumbsUp, MessageSquare
 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -56,18 +57,20 @@ const Reports = () => {
         department: [],
         trend: [],
         agents: [],
-        sla: null
+        sla: null,
+        feedback: null
     });
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [summaryRes, deptRes, trendRes, agentRes, slaRes] = await Promise.all([
+            const [summaryRes, deptRes, trendRes, agentRes, slaRes, feedbackRes] = await Promise.all([
                 api.get('/analytics/summary'),
                 api.get('/analytics/by-department'),
                 api.get('/analytics/trend?days=14'),
                 api.get('/analytics/agent-performance'),
-                api.get('/analytics/sla-compliance')
+                api.get('/analytics/sla-compliance'),
+                api.get('/analytics/feedback-summary')
             ]);
 
             setData({
@@ -75,7 +78,8 @@ const Reports = () => {
                 department: deptRes.data.data,
                 trend: trendRes.data.data,
                 agents: agentRes.data.data,
-                sla: slaRes.data.data
+                sla: slaRes.data.data,
+                feedback: feedbackRes.data.data
             });
             setLastRefresh(new Date());
         } catch (error) {
@@ -161,6 +165,7 @@ const Reports = () => {
                     { id: 'departments', label: 'Departments', icon: Building2 },
                     { id: 'agents', label: 'Agent Performance', icon: Users },
                     { id: 'sla', label: 'SLA Analysis', icon: ShieldCheck },
+                    { id: 'feedback', label: 'Feedback Analysis', icon: Award },
                 ].map((tab) => (
                     <button
                         key={tab.id}
@@ -454,6 +459,104 @@ const Reports = () => {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'feedback' && (
+                <div className="space-y-8 animate-slide-up">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <StatCard
+                            title="Average Rating"
+                            value={data.feedback?.avg_rating || 0}
+                            subValue="Out of 5 stars"
+                            icon={Star}
+                            color="bg-amber-50 text-amber-600"
+                        />
+                        <StatCard
+                            title="Total Submissions"
+                            value={data.feedback?.total_feedbacks || 0}
+                            subValue="Employee sentiment data"
+                            icon={MessageSquare}
+                            color="bg-purple-50 text-purple-600"
+                        />
+                        <StatCard
+                            title="Resolution Score"
+                            value={`${Math.round(((data.feedback?.avg_rating || 0) / 5) * 100)}%`}
+                            subValue="Satisfaction index"
+                            icon={Heart}
+                            color="bg-rose-50 text-rose-600"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm">
+                            <SectionHeader
+                                title="Sentiment Distribution"
+                                description="Percentage breakdown of user ratings."
+                            />
+                            <div className="h-[400px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={Object.entries(data.feedback?.rating_distribution || {}).map(([star, count]) => ({
+                                                name: `${star} Stars`,
+                                                value: count
+                                            })).filter(d => d.value > 0)}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={80}
+                                            outerRadius={130}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                        >
+                                            {['#EF4444', '#F97316', '#FBBF24', '#34D399', '#4F46E5'].map((color, index) => (
+                                                <Cell key={`cell-${index}`} fill={color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        />
+                                        <Legend iconType="circle" layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ fontSize: '11px', fontWeight: '700' }} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm">
+                            <SectionHeader
+                                title="Service Highlights"
+                                description="Most common positive attributes reported by staff."
+                            />
+                            <div className="h-[400px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={Object.entries(data.feedback?.top_suggestions || {}).map(([label, count]) => ({
+                                        name: label,
+                                        count: count
+                                    }))} layout="vertical">
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f3f4f6" />
+                                        <XAxis type="number" hide />
+                                        <YAxis
+                                            dataKey="name"
+                                            type="category"
+                                            axisLine={false}
+                                            tickLine={false}
+                                            width={140}
+                                            tick={{ fontSize: 11, fontWeight: 700, fill: '#374151' }}
+                                        />
+                                        <Tooltip
+                                            cursor={{ fill: '#f9fafb' }}
+                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        />
+                                        <Bar dataKey="count" name="Frequency" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={24}>
+                                            {Object.entries(data.feedback?.top_suggestions || {}).map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </div>
                         </div>
                     </div>

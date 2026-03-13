@@ -35,6 +35,13 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+    Clock,
+    CheckCircle,
+    XCircle,
+    UserPlus,
+    Briefcase
+} from 'lucide-react';
 
 // Base URL for API
 const API_BASE_URL = 'http://127.0.0.1:5000/api';
@@ -79,6 +86,77 @@ export default function Settings() {
         newPassword: '',
         confirmPassword: ''
     });
+
+    // Reset Requests state
+    const [resetRequests, setResetRequests] = useState([]);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [loadingAction, setLoadingAction] = useState(false);
+
+    useEffect(() => {
+        if (view === 'reset_requests' && user.role === 'ADMIN') {
+            fetchResetRequests();
+        }
+    }, [view]);
+
+    const fetchResetRequests = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${API_BASE_URL}/admin/reset-password/requests`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data.success) {
+                setResetRequests(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching reset requests:", error);
+            setMessage({ type: 'error', text: 'Failed to fetch reset requests.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleApproveReset = async (requestId) => {
+        setLoadingAction(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post(`${API_BASE_URL}/admin/reset-password/approve`, {
+                request_id: requestId
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data.success) {
+                setMessage({ type: 'success', text: response.data.message });
+                fetchResetRequests();
+                setSelectedRequest(null);
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to approve reset.' });
+        } finally {
+            setLoadingAction(false);
+        }
+    };
+
+    const handleDeclineReset = async (requestId) => {
+        setLoadingAction(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post(`${API_BASE_URL}/admin/reset-password/reject`, {
+                request_id: requestId
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data.success) {
+                setMessage({ type: 'success', text: response.data.message });
+                fetchResetRequests();
+                setSelectedRequest(null);
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to decline reset.' });
+        } finally {
+            setLoadingAction(false);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -610,6 +688,125 @@ export default function Settings() {
         );
     }
 
+    if (view === 'reset_requests') {
+        return (
+            <div className="max-w-[1200px] mx-auto p-6 sm:p-12">
+                <div className="flex items-center justify-between gap-6 mb-16">
+                    <div className="flex items-center gap-6">
+                        <button onClick={() => setView('menu')} className="p-4 bg-white shadow-md hover:bg-gray-50 rounded-[24px] border border-gray-100 transition-all">
+                            <ArrowLeft className="w-8 h-8 text-indigo-600" />
+                        </button>
+                        <h2 className="text-5xl font-black text-gray-900 tracking-tighter">Reset Requests</h2>
+                    </div>
+                    {loading && <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>}
+                </div>
+
+                {message.text && (
+                    <div className={`mb-8 p-6 rounded-[32px] flex items-center gap-4 animate-in fade-in slide-in-from-top-4 ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
+                        {message.type === 'success' ? <CheckCircle2 className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
+                        <p className="font-bold">{message.text}</p>
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {resetRequests.length === 0 ? (
+                        <div className="col-span-full py-24 text-center bg-gray-50 rounded-[56px] border-4 border-dashed border-gray-100">
+                            <CheckCircle className="w-20 h-20 text-gray-200 mx-auto mb-6" />
+                            <h3 className="text-3xl font-black text-gray-300">No Pending Requests</h3>
+                            <p className="text-gray-400 font-bold mt-2">All password resets are up to date.</p>
+                        </div>
+                    ) : (
+                        resetRequests.map((req) => (
+                            <div
+                                key={req.id}
+                                onClick={() => setSelectedRequest(req)}
+                                className="bg-white p-10 rounded-[48px] border border-gray-100 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer group relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-bl-[100px] -mr-16 -mt-16 group-hover:bg-indigo-600/10 transition-colors" />
+
+                                <div className="flex items-center justify-between mb-8 relative z-10">
+                                    <div className="w-20 h-20 rounded-[28px] bg-indigo-50 flex items-center justify-center text-indigo-600 text-3xl font-black group-hover:bg-indigo-600 group-hover:text-white shadow-lg transition-all">
+                                        {req.user_name?.[0] || 'U'}
+                                    </div>
+                                    <div className="px-5 py-2 bg-amber-50 rounded-full border border-amber-100 shadow-sm">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                                            <span className="text-[11px] font-black text-amber-600 uppercase tracking-widest">{req.status}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h3 className="text-2xl font-black text-gray-900 mb-2 truncate">{req.user_name}</h3>
+                                <p className="text-gray-400 font-black text-xs uppercase tracking-widest mb-6 px-1">{req.role}</p>
+
+                                <div className="flex items-center gap-3 text-indigo-600 text-sm font-black group-hover:gap-5 transition-all">
+                                    Access Profile <ChevronRight className="w-5 h-5" />
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Request Detail Modal */}
+                {selectedRequest && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-gray-900/60 backdrop-blur-md animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-2xl rounded-[64px] shadow-2xl overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-300 border border-white/20">
+                            <div className="p-12 border-b border-gray-50 bg-gradient-to-r from-indigo-50/80 to-indigo-50/20 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-3 h-10 bg-indigo-600 rounded-full" />
+                                    <h3 className="text-4xl font-black text-gray-900 tracking-tight">User Identity Audit</h3>
+                                </div>
+                                <button onClick={() => setSelectedRequest(null)} className="p-4 hover:bg-white rounded-[24px] text-gray-400 border border-transparent hover:border-gray-100 hover:shadow-md transition-all">
+                                    <ArrowLeft className="w-8 h-8" />
+                                </button>
+                            </div>
+                            <div className="p-12 space-y-12">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                                    <ProfileDetailItem label="Legal Name" value={selectedRequest.user_name} icon={User} />
+                                    <ProfileDetailItem label="Corporate Email" value={selectedRequest.email} icon={Mail} />
+                                    <ProfileDetailItem label="Employee ID" value={selectedRequest.emp_id} icon={ShieldCheck} />
+                                    <ProfileDetailItem label="System Role" value={selectedRequest.role} icon={Briefcase} />
+                                    <ProfileDetailItem label="Timestamp" value={new Date(selectedRequest.requested_at).toLocaleString()} icon={Clock} />
+                                </div>
+
+                                <div className="pt-12 border-t border-gray-50 flex flex-col sm:flex-row gap-6">
+                                    <button
+                                        onClick={() => handleApproveReset(selectedRequest.id)}
+                                        disabled={loadingAction}
+                                        className="flex-[2] py-8 bg-blue-600 hover:bg-blue-700 text-white rounded-[32px] font-black text-2xl shadow-2xl shadow-blue-500/30 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4"
+                                    >
+                                        {loadingAction ? (
+                                            <div className="flex items-center gap-4">
+                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                                                Generating...
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <Lock className="w-7 h-7" />
+                                                Approve Reset
+                                            </>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeclineReset(selectedRequest.id)}
+                                        disabled={loadingAction}
+                                        className="flex-1 py-8 bg-white border-2 border-rose-100 hover:bg-rose-50 text-rose-600 rounded-[32px] font-black text-xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                                    >
+                                        <XCircle className="w-6 h-6" />
+                                        Decline
+                                    </button>
+                                </div>
+
+                                <p className="text-center text-gray-400 text-[10px] font-black uppercase tracking-widest italic opacity-60">
+                                    Security Action: This will generate a new temporary password and force a change on login.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     // Main Settings Menu (Web Optimized)
     return (
         <div className="max-w-[1200px] mx-auto p-8 sm:p-12 pt-16 pb-32">
@@ -679,6 +876,14 @@ export default function Settings() {
                         <div className="flex-1 h-px bg-gray-100" />
                     </div>
                     <div className="bg-white rounded-[48px] shadow-2xl shadow-indigo-500/10 border border-gray-50 overflow-hidden divide-y divide-gray-50">
+                        {user.role === 'ADMIN' && (
+                            <MenuItem
+                                icon={ShieldCheck}
+                                label="Reset Requests"
+                                color="bg-amber-500"
+                                onClick={() => setView('reset_requests')}
+                            />
+                        )}
                         <MenuItem
                             icon={HelpCircle}
                             label="Help Center"
