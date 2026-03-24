@@ -10,6 +10,8 @@ const api = axios.create({
 // Add a request interceptor to include JWT token
 api.interceptors.request.use(
   (config) => {
+    // TODO: SECURITY RISK - localStorage is vulnerable to XSS. 
+    // For production, consider using httpOnly cookies to prevent token theft.
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

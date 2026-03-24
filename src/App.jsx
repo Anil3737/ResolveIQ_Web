@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Auth
 import Login from './pages/Login';
@@ -68,7 +68,7 @@ function App() {
         {/* ── Public ── */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
         {/* ── Employee ── */}
         <Route path="/employee" element={<ProtectedRoute role="EMPLOYEE"><EmployeeLayout /></ProtectedRoute>}>

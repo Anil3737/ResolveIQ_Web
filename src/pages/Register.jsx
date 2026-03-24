@@ -90,7 +90,7 @@ const Register = () => {
         try {
             const response = await api.post('/auth/register', {
                 full_name: formData.full_name,
-                phone: formData.employee_id,       // backend uses 'phone' for employee ID
+                phone: formData.employee_id.toUpperCase(), // Ensure uppercase
                 email: formData.email,
                 password: formData.password,
                 location: formData.office_location  // backend uses 'location'

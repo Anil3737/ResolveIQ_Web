@@ -100,12 +100,20 @@ const UsersPage = () => {
         setSubmitting(true);
         try {
             if (modalMode === 'create') {
-                // Use existing staff/user creation endpoints if possible, or build new one
-                // For now, let's assume we use a unified admin/users POST if we had one, 
-                // but since the original logic had /create-staff and /create-user, 
-                // we'll follow that pattern.
-                const endpoint = ['AGENT', 'TEAM_LEAD'].includes(formData.role) ? '/admin/create-staff' : '/admin/create-user';
-                await api.post(endpoint, formData);
+                const isStaff = ['AGENT', 'TEAM_LEAD'].includes(formData.role);
+                const endpoint = isStaff ? '/admin/create-staff' : '/admin/create-user';
+
+                // Prepare sanitized payload
+                const payload = {
+                    ...formData,
+                    emp_id: formData.emp_id.trim().toUpperCase(),
+                    full_name: formData.full_name.trim(),
+                    // Backend expects 'department' string, not ID for staff creation
+                    department: isStaff ? departments.find(d => d.id == formData.department_id)?.name : undefined,
+                    location: 'Main Campus' // Default if not selected
+                };
+
+                await api.post(endpoint, payload);
             } else {
                 await api.put(`/admin/users/${formData.id}`, formData);
             }

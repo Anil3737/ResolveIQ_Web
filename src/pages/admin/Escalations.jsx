@@ -32,7 +32,7 @@ const Escalations = () => {
     const fetchEscalatedTickets = async () => {
         try {
             setLoading(true);
-            const res = await api.get('/api/tickets?escalated=true');
+            const res = await api.get('/tickets?escalated=true');
             setTickets(res.data.data || []);
         } catch (err) {
             console.error('Failed to fetch escalated tickets:', err);
@@ -44,7 +44,7 @@ const Escalations = () => {
     const handleResolveEscalation = async (ticketId) => {
         setActionLoading(ticketId);
         try {
-            await api.post(`/api/tickets/${ticketId}/resolve-escalation`);
+            await api.post(`/tickets/${ticketId}/resolve-escalation`);
             setMessage({ type: 'success', text: 'Escalation cleared successfully' });
             setTickets(tickets.filter(t => t.id !== ticketId));
             setTimeout(() => setMessage(null), 3000);

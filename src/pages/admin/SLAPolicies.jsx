@@ -29,7 +29,7 @@ const SLAPolicies = () => {
         try {
             const [deptsRes, rulesRes] = await Promise.all([
                 api.get('/admin/departments'),
-                api.get('/api/sla/rules') // Note: based on backend __init__ registration
+                api.get('/sla/rules') // Note: based on backend __init__ registration
             ]);
             setDepartments(deptsRes.data.data || []);
             setRules(rulesRes.data.data || []);
@@ -55,14 +55,14 @@ const SLAPolicies = () => {
     const handleUpdateRule = async (deptId, priority, hours) => {
         setSaving({ deptId, priority });
         try {
-            await api.post('/api/sla/rules', {
+            await api.post('/sla/rules', {
                 department_id: deptId,
                 priority: priority,
                 sla_hours: parseInt(hours)
             });
             setMessage({ type: 'success', text: 'Policy updated successfully' });
             // Refresh rules
-            const res = await api.get('/api/sla/rules');
+            const res = await api.get('/sla/rules');
             setRules(res.data.data);
             setTimeout(() => setMessage(null), 3000);
         } catch (err) {

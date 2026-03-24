@@ -16,6 +16,7 @@ export const formatTicketSubmit = (data) => {
         title: formattedTitle,
         description: formattedDescription,
         issue_type,
+        location,
         expected_resolution_time
     };
 };
