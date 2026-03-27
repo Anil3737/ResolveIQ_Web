@@ -190,15 +190,15 @@ const Reports = () => {
                         />
                         <StatCard
                             title="Resolved"
-                            value={data.summary?.status_summary?.RESOLVED || 0}
-                            subValue={`${Math.round((data.summary?.status_summary?.RESOLVED / data.summary?.total_tickets) * 100) || 0}% Completion rate`}
+                            value={(data.summary?.status_summary?.RESOLVED || 0) + (data.summary?.status_summary?.CLOSED || 0)}
+                            subValue={`${Math.round((((data.summary?.status_summary?.RESOLVED || 0) + (data.summary?.status_summary?.CLOSED || 0)) / (data.summary?.total_tickets || 1)) * 100)}% Completion rate`}
                             icon={CheckCircle2}
                             color="bg-green-50 text-green-600"
                         />
                         <StatCard
-                            title="Pending Approval"
-                            value={data.summary?.status_summary?.OPEN || 0}
-                            subValue="Waiting for action"
+                            title="Active Tickets"
+                            value={(data.summary?.status_summary?.OPEN || 0) + (data.summary?.status_summary?.APPROVED || 0) + (data.summary?.status_summary?.IN_PROGRESS || 0) + (data.summary?.status_summary?.ESCALATED || 0)}
+                            subValue="Total workload in progress"
                             icon={Clock}
                             color="bg-amber-50 text-amber-600"
                         />

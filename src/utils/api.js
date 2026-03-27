@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api', // Proxied to http://localhost:5000/api via vite.config.js
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://180.235.121.253:8070/api', // Use production IP if VITE_API_BASE_URL is not set
   headers: {
     'Content-Type': 'application/json',
   },

@@ -4,6 +4,7 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 // Auth
 import Login from './pages/Login';
 import Register from './pages/Register';
+import TermsOfService from './pages/TermsOfService';
 
 // Layouts
 import EmployeeLayout from './layouts/EmployeeLayout';
@@ -68,6 +69,7 @@ function App() {
         {/* ── Public ── */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/terms" element={<TermsOfService />} />
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
         {/* ── Employee ── */}
